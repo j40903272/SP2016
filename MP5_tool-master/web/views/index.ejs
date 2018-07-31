@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"></meta>
+<link rel="stylesheet" type="text/css" href="css/reset.css"></link>
+<link rel="stylesheet" type="text/css" href="css/bootstrap.css"></link>
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.js"></script>
+<script src="js/highcharts.js"></script>
+<script src="js/exporting.js"></script>
+</head>
+<body>
+<div class="container">
+<div class="row">
+  <div class="col-md-12">
+    <h1><%= proc.pid %> <%= proc.cmd %></h1>
+  </div>
+</div><!-- row -->
+<div class="row">
+  <div class="col-md-2 sidebar">
+    <a href="/choose" type="button" class="btn btn-block btn-info">Back To Choose</a>
+  </div><!-- sidebar -->
+  <div class="col-md-10" id="accordion">
+    <div id="threads-static-graph" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+  </div><!-- graph -->
+</div><!-- row -->
+</div>
+<script>
+$(function () {
+  $(document).ready(function() {
+    Highcharts.setOptions({
+      global: {
+        useUTC: false
+      }
+    });
+    var chart;
+    $('#threads-static-graph').highcharts({
+      chart: {
+        type: 'spline',
+        animation: Highcharts.svg, // don't animate in old IE
+        marginRight: 10,
+        events: {
+          load: function() {
+            // set up the updating of the chart each second
+            var series = this.series[0];
+            var update_func = function() {
+              $.post("/api/threads_active", function(data) {
+                if (data.error) {
+                  alert(data.error);
+                } else {
+                  var x = (new Date()).getTime(),
+                    y = data.success;
+                  series.addPoint([x, y], true, true);
+                  setTimeout(update_func, 1000);
+                }
+              });
+            };
+            update_func();
+          }
+        }
+      },
+      title: {
+        text: 'Active Threads Statics'
+      },
+      xAxis: {
+        type: 'datetime',
+        tickPixelInterval: 150
+      },
+      yAxis: {
+        title: {
+          text: 'Value'
+        },
+        plotLines: [{
+          value: 0,
+          width: 1,
+          color: '#808080'
+        }]
+      },
+      tooltip: {
+        formatter: function() {
+          return '<b>'+ this.series.name +'</b><br/>'+
+            Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) +'<br/>'+
+            Highcharts.numberFormat(this.y, 2);
+        }
+      },
+      legend: {
+        enabled: false
+      },
+      exporting: {
+        enabled: false
+      },
+      series: [{
+        name: 'Active Threads',
+        data: (function() {
+          // generate an array of random data
+          var data = [],
+            time = (new Date()).getTime(),
+            i;
+          for (i = -19; i <= 0; i++) {
+            data.push({
+              x: time + i * 1000,
+              y: 0
+            });
+          }
+          return data;
+        })()
+      }]
+    });
+  });
+});
+</script>
+</body>
+</html>

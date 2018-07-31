@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"></meta>
+<link rel="stylesheet" type="text/css" href="css/reset.css"></link>
+<link rel="stylesheet" type="text/css" href="css/bootstrap.css"></link>
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.js"></script>
+</head>
+<body>
+<div class="container">
+<div class="row">
+  <div class="col-md-12">
+    <h1>Choose a server</h1>
+  <% if (error) { %>
+    <div class="alert alert-danger">
+      <p><%= error %></p>
+    </div><!-- alert -->
+  <% } else { %>
+    <form method="POST" action="/choose">
+      <table class="table table-striped table-bordered table-hover">
+      <% for (var i = 0; i < pids.length; ++i) { %>
+        <tr>
+          <td>
+            <input type="radio" name="pid" value="<%= pids[i].pid %>" id="pid<%= i %>"></input>
+            <label for="pid<%= i %>"><%= pids[i].pid %></label>
+          </td>
+          <td><label for="pid<%= i %>"><%= pids[i].cmd %></label></td>
+        </tr>
+      <% } %>
+      </table>
+      <input type="submit"></input>
+    </form>
+  <% } %>
+  </div><!-- col-md-12 -->
+</div><!-- row -->
+</div>
+</body>
+</html>
